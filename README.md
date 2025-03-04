@@ -9,6 +9,8 @@
 ## c. Short Description  
 The application utilizes three different medical datasets to support disease diagnosis. After the user provides answers to specific questions, the program analyzes the information and presents the probability of a given disease (**lung cancer, diabetes, or heart disease**).  
 
+VIDEO PRESENTATION: https://youtu.be/i9-AxvA_Rkg
+
 The results are calculated based on three selected machine learning models:  
 - **Logistic Regression**  
 - **Decision Tree**  
