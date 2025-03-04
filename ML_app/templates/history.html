@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Historia Predykcji - {{ dataset_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Historia Predykcji - {{ dataset_name }}</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    {% if dataset_name == 'heart_disease' %}
+                        <th>Wiek</th>
+                        <th>Płeć</th>
+                    {% elif dataset_name == 'diabetes' %}
+                        <th>Wiek</th>
+                        <th>Poziom Glukozy</th>
+                    {% else %}  {# lung_cancer #}
+                        <th>Wiek</th>
+                        <th>Płeć</th>
+                    {% endif %}
+                    <th>Random Forest</th>
+                    <th>Logistic Regression</th>
+                    <th>Decision Tree</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in predictions %}
+                <tr>
+                    <td>{{ pred.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    {% if dataset_name == 'heart_disease' %}
+                        <td>{{ pred.age }}</td>
+                        <td>{{ "Mężczyzna" if pred.sex == 1 else "Kobieta" }}</td>
+                    {% elif dataset_name == 'diabetes' %}
+                        <td>{{ pred.age }}</td>
+                        <td>{{ pred.glucose }}</td>
+                    {% else %}  {# lung_cancer #}
+                        <td>{{ pred.age }}</td>
+                        <td>{{ "Mężczyzna" if pred.gender == "M" else "Kobieta" }}</td>
+                    {% endif %}
+                    <td>
+                        {{ "Pozytywny" if pred.rf_prediction == 1 else "Negatywny" }}
+                        ({{ "%.1f"|format(pred.rf_probability * 100) }}%)
+                    </td>
+                    <td>
+                        {{ "Pozytywny" if pred.lr_prediction == 1 else "Negatywny" }}
+                        ({{ "%.1f"|format(pred.lr_probability * 100) }}%)
+                    </td>
+                    <td>
+                        {{ "Pozytywny" if pred.dt_prediction == 1 else "Negatywny" }}
+                        ({{ "%.1f"|format(pred.dt_probability * 100) }}%)
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-info" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#details{{ pred.id }}"
+                                    aria-expanded="false">
+                                Szczegóły
+                            </button>
+                            <a href="{{ url_for('delete_prediction', dataset_name=dataset_name, prediction_id=pred.id) }}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Czy na pewno chcesz usunąć tę predykcję?')">
+                                Usuń
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="p-0">
+                        <div class="collapse" id="details{{ pred.id }}">
+                            <div class="card card-body m-2">
+                                <h6 class="mb-3">Dane wejściowe:</h6>
+                                {% if dataset_name == 'heart_disease' %}
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p><strong>Wiek:</strong> {{ pred.age }}</p>
+                                            <p><strong>Płeć:</strong> {{ "Mężczyzna" if pred.sex == 1 else "Kobieta" }}</p>
+                                            <p><strong>Typ bólu w klatce:</strong> {{ pred.cp }}</p>
+                                            <p><strong>Ciśnienie spoczynkowe:</strong> {{ pred.trestbps }}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Cholesterol:</strong> {{ pred.chol }}</p>
+                                            <p><strong>Cukier na czczo:</strong> {{ pred.fbs }}</p>
+                                            <p><strong>EKG spoczynkowe:</strong> {{ pred.restecg }}</p>
+                                            <p><strong>Tętno max:</strong> {{ pred.thalachh }}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Dławica wysiłkowa:</strong> {{ pred.exng }}</p>
+                                            <p><strong>Obniżenie ST:</strong> {{ pred.oldpeak }}</p>
+                                            <p><strong>Nachylenie ST:</strong> {{ pred.slp }}</p>
+                                            <p><strong>Liczba naczyń:</strong> {{ pred.caa }}</p>
+                                            <p><strong>Test Thallium:</strong> {{ pred.thall }}</p>
+                                        </div>
+                                    </div>
+                                {% elif dataset_name == 'diabetes' %}
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p><strong>Wiek:</strong> {{ pred.age }}</p>
+                                            <p><strong>Liczba ciąż:</strong> {{ pred.pregnancies }}</p>
+                                            <p><strong>Poziom glukozy:</strong> {{ pred.glucose }}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Ciśnienie krwi:</strong> {{ pred.blood_pressure }}</p>
+                                            <p><strong>Grubość skóry:</strong> {{ pred.skin_thickness }}</p>
+                                            <p><strong>Insulina:</strong> {{ pred.insulin }}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>BMI:</strong> {{ pred.bmi }}</p>
+                                            <p><strong>Funkcja rodowodu:</strong> {{ pred.diabetes_pedigree_function }}</p>
+                                        </div>
+                                    </div>
+                                {% else %}  {# lung_cancer #}
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p><strong>Wiek:</strong> {{ pred.age }}</p>
+                                            <p><strong>Płeć:</strong> {{ "Mężczyzna" if pred.gender == "M" else "Kobieta" }}</p>
+                                            <p><strong>Palenie:</strong> {{ "Tak" if pred.smoking == 2 else "Nie" }}</p>
+                                            <p><strong>Żółte palce:</strong> {{ "Tak" if pred.yellow_fingers == 2 else "Nie" }}</p>
+                                            <p><strong>Niepokój:</strong> {{ "Tak" if pred.anxiety == 2 else "Nie" }}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Presja rówieśników:</strong> {{ "Tak" if pred.peer_pressure == 2 else "Nie" }}</p>
+                                            <p><strong>Choroba przewlekła:</strong> {{ "Tak" if pred.chronic_disease == 2 else "Nie" }}</p>
+                                            <p><strong>Zmęczenie:</strong> {{ "Tak" if pred.fatigue == 2 else "Nie" }}</p>
+                                            <p><strong>Alergia:</strong> {{ "Tak" if pred.allergy == 2 else "Nie" }}</p>
+                                            <p><strong>Świszczący oddech:</strong> {{ "Tak" if pred.wheezing == 2 else "Nie" }}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Spożycie alkoholu:</strong> {{ "Tak" if pred.alcohol_consuming == 2 else "Nie" }}</p>
+                                            <p><strong>Kaszel:</strong> {{ "Tak" if pred.coughing == 2 else "Nie" }}</p>
+                                            <p><strong>Duszności:</strong> {{ "Tak" if pred.shortness_of_breath == 2 else "Nie" }}</p>
+                                            <p><strong>Trudności w połykaniu:</strong> {{ "Tak" if pred.swallowing_difficulty == 2 else "Nie" }}</p>
+                                            <p><strong>Ból w klatce:</strong> {{ "Tak" if pred.chest_pain == 2 else "Nie" }}</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-primary">Powrót do strony głównej</a>
+    </div>
+</div>
+{% endblock %}

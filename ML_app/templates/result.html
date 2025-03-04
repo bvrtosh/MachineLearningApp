@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Wyniki Predykcji{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Wyniki Predykcji</h2>
+                
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for model_name, result in predictions.items() %}
+                    <div class="col">
+                        <div class="card h-100 prediction-card">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">{{ model_name }}</h5>
+                                <div class="text-center mt-3">
+                                    <h6 class="mb-3">Predykcja:</h6>
+                                    <div class="alert {% if result.prediction == 1 %}alert-danger{% else %}alert-success{% endif %}">
+                                        {% if dataset_name == 'heart_disease' %}
+                                            {% if result.prediction == 1 %}
+                                                Wykryto ryzyko
+                                            {% else %}
+                                                Brak ryzyka
+                                            {% endif %}
+                                        {% elif dataset_name == 'diabetes' %}
+                                            {% if result.prediction == 1 %}
+                                                Ryzyko cukrzycy
+                                            {% else %}
+                                                Brak ryzyka
+                                            {% endif %}
+                                        {% elif dataset_name == 'lung_cancer' %}
+                                            {% if result.prediction == 1 %}
+                                                Wykryto ryzyko
+                                            {% else %}
+                                                Brak ryzyka
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                    <div class="mt-3">
+                                        <p class="mb-1">Prawdopodobieństwo:</p>
+                                        <h4>{{ "%.1f"|format(result.probability * 100) }}%</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('dataset_form', dataset_name=dataset_name) }}" 
+                       class="btn btn-primary">Nowa Predykcja</a>
+                    <a href="/" class="btn btn-secondary ms-2">Powrót do Strony Głównej</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

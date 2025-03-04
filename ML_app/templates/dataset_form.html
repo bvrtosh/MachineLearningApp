@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if dataset_name == 'heart_disease' %}
+        Analiza Chorób Serca
+    {% elif dataset_name == 'diabetes' %}
+        Analiza Cukrzycy
+    {% elif dataset_name == 'lung_cancer' %}
+        Analiza Raka Płuc
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">
+                    {% if dataset_name == 'heart_disease' %}
+                        Wprowadź Dane do Analizy Chorób Serca
+                    {% elif dataset_name == 'diabetes' %}
+                        Wprowadź Dane do Analizy Cukrzycy
+                    {% elif dataset_name == 'lung_cancer' %}
+                        Wprowadź Dane do Analizy Raka Płuc
+                    {% endif %}
+                </h2>
+
+                <form method="POST" action="{{ url_for('predict', dataset_name=dataset_name) }}">
+                    {% for feature, description in features %}
+                    <div class="mb-3">
+                        <label for="{{ feature }}" class="form-label">{{ description }}</label>
+                        {% if feature == 'GENDER' %}
+                            <select class="form-select" id="{{ feature }}" name="{{ feature }}" required>
+                                <option value="" selected disabled>Wybierz płeć</option>
+                                <option value="M">Mężczyzna</option>
+                                <option value="F">Kobieta</option>
+                            </select>
+                        {% elif feature == 'sex' %}
+                            <select class="form-select" id="{{ feature }}" name="{{ feature }}" required>
+                                <option value="" selected disabled>Wybierz płeć</option>
+                                <option value="1">Mężczyzna</option>
+                                <option value="0">Kobieta</option>
+                            </select>
+                        {% else %}
+                            <input type="number" step="any" class="form-control" id="{{ feature }}"
+                                   name="{{ feature }}" required
+                                   {% if feature == 'cp' %}
+                                       min="0" max="3" step="1"
+                                   {% elif feature == 'restecg' %}
+                                       min="0" max="2" step="1"
+                                   {% elif 'SMOKING' in feature or 'ANXIETY' in feature or 'YELLOW_FINGERS' in feature or
+                                         'ALCOHOL' in feature or 'COUGHING' in feature or 'SHORTNESS OF BREATH' in feature or
+                                         'SWALLOWING DIFFICULTY' in feature or 'CHEST PAIN' in feature or 'WHEEZING' in feature or
+                                         'PEER_PRESSURE' in feature or 'CHRONIC DISEASE' in feature or 'FATIGUE' in feature or
+                                         'ALLERGY' in feature %}
+                                       min="1" max="2" step="1"
+                                   {% elif feature == 'age' or feature == 'Age' or feature == 'AGE' %}
+                                       min="0" max="120" step="1"
+                                   {% elif feature == 'trestbps' or feature == 'BloodPressure' %}
+                                       min="0" max="300" step="1"
+                                   {% elif feature == 'chol' %}
+                                       min="0" max="600" step="1"
+                                   {% elif feature == 'fbs' %}
+                                       min="0" max="1" step="1"
+                                   {% elif feature == 'thalachh' %}
+                                       min="0" max="250" step="1"
+                                   {% elif feature == 'exng' %}
+                                       min="0" max="1" step="1"
+                                   {% elif feature == 'oldpeak' %}
+                                       min="0" max="10" step="0.1"
+                                   {% elif feature == 'slp' %}
+                                       min="0" max="2" step="1"
+                                   {% elif feature == 'caa' %}
+                                       min="0" max="3" step="1"
+                                   {% elif feature == 'thall' %}
+                                       min="1" max="3" step="1"
+                                   {% elif feature == 'Pregnancies' %}
+                                       min="0" max="20" step="1"
+                                   {% elif feature == 'Glucose' %}
+                                       min="0" max="500" step="1"
+                                   {% elif feature == 'SkinThickness' %}
+                                       min="0" max="100" step="1"
+                                   {% elif feature == 'Insulin' %}
+                                       min="0" max="1000" step="1"
+                                   {% elif feature == 'BMI' %}
+                                       min="0" max="100" step="0.1"
+                                   {% elif feature == 'DiabetesPedigreeFunction' %}
+                                       min="0" max="2.5" step="0.001"
+                                   {% endif %}>
+                        {% endif %}
+                        <div class="feature-description small text-muted mt-1">
+                            {% if feature == 'cp' %}
+                                Wartości: 0-3 (0: typowy ból, 1: nietypowy ból, 2: ból niezwiązany, 3: bezobjawowy)
+                            {% elif feature == 'restecg' %}
+                                Wartości: 0-2 (0: normalny, 1: nieprawidłowości ST-T, 2: przerost lewej komory)
+                            {% elif 'SMOKING' in feature %}
+                                Palenie: 1 (Nie) lub 2 (Tak)
+                            {% elif feature == 'age' %}
+                                Wprowadź wiek pacjenta (0-120 lat)
+                            {% elif feature == 'sex' %}
+                                Wybierz płeć (kodowane jako: 1 - mężczyzna, 0 - kobieta)
+                            {% elif feature == 'trestbps' %}
+                                Wprowadź ciśnienie krwi w spoczynku (0-300 mm Hg)
+                            {% elif feature == 'chol' %}
+                                Wprowadź poziom cholesterolu w surowicy (0-600 mg/dl)
+                            {% elif feature == 'fbs' %}
+                                Poziom cukru na czczo > 120 mg/dl (1: tak, 0: nie)
+                            {% elif feature == 'thalachh' %}
+                                Wprowadź maksymalne osiągnięte tętno (0-250)
+                            {% elif feature == 'exng' %}
+                                Dławica wywołana wysiłkiem (1: tak, 0: nie)
+                            {% elif feature == 'oldpeak' %}
+                                Obniżenie ST wywołane wysiłkiem względem spoczynku (0-10)
+                            {% elif feature == 'slp' %}
+                                Nachylenie szczytowego odcinka ST (0: wznoszące, 1: płaskie, 2: opadające)
+                            {% elif feature == 'caa' %}
+                                Liczba głównych naczyń (0-3)
+                            {% elif feature == 'thall' %}
+                                Wynik badania talowego (1: normalny, 2: utrwalony defekt, 3: odwracalny defekt)
+                            {% elif 'YELLOW_FINGERS' in feature %}
+                                Żółte palce (1: nie, 2: tak)
+                            {% elif 'ALCOHOL' in feature %}
+                                Spożywanie alkoholu (1: nie, 2: tak)
+                            {% elif 'COUGHING' in feature %}
+                                Kaszel (1: nie, 2: tak)
+                            {% elif 'SHORTNESS OF BREATH' in feature %}
+                                Duszności (1: nie, 2: tak)
+                            {% elif 'SWALLOWING DIFFICULTY' in feature %}
+                                Trudności w połykaniu (1: nie, 2: tak)
+                            {% elif 'CHEST PAIN' in feature %}
+                                Ból w klatce piersiowej (1: nie, 2: tak)
+                            {% elif 'WHEEZING' in feature %}
+                                Świszczący oddech (1: nie, 2: tak)
+                            {% elif 'GENDER' in feature %}
+                                Wybierz płeć
+                            {% elif feature == 'AGE' %}
+                                Wprowadź wiek pacjenta (0-120 lat)
+                            {% elif 'PEER_PRESSURE' in feature %}
+                                Presja rówieśników: 1 (Nie) lub 2 (Tak)
+                            {% elif 'CHRONIC DISEASE' in feature %}
+                                Choroby przewlekłe: 1 (Nie) lub 2 (Tak)
+                            {% elif 'FATIGUE' in feature %}
+                                Zmęczenie: 1 (Nie) lub 2 (Tak)
+                            {% elif 'ALLERGY' in feature %}
+                                Alergia: 1 (Nie) lub 2 (Tak)
+                            {% elif 'ANXIETY' in feature %}
+                                Niepokój: 1 (Nie) lub 2 (Tak)
+                            {% elif 'Pregnancies' in feature %}
+                                Liczba ciąż (0-20)
+                            {% elif 'Glucose' in feature %}
+                                Poziom glukozy (0-500 mg/dl)
+                            {% elif 'BloodPressure' in feature %}
+                                Ciśnienie krwi (0-300 mm Hg)
+                            {% elif 'SkinThickness' in feature %}
+                                Grubość fałdu skórnego (0-100 mm)
+                            {% elif 'Insulin' in feature %}
+                                Poziom insuliny (0-1000 µU/ml)
+                            {% elif 'BMI' in feature %}
+                                Wskaźnik masy ciała (0-100)
+                            {% elif 'DiabetesPedigreeFunction' in feature %}
+                                Funkcja rodowodu cukrzycy (0-2.5)
+                            {% elif feature == 'Age' %}
+                                Wprowadź wiek pacjenta (0-120 lat)
+                            {% else %}
+                                Wprowadź odpowiednią wartość numeryczną
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">Dokonaj Predykcji</button>
+                        <a href="/" class="btn btn-secondary ms-2">Powrót</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

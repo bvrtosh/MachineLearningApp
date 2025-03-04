@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Wybierz Zbiór Danych - System Predykcji Chorób{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Wybierz Zbiór Danych do Analizy</h2>
+                
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for dataset in datasets %}
+                    <div class="col">
+                        <div class="card h-100 prediction-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">
+                                    {% if dataset == 'heart_disease' %}
+                                        Choroby Serca
+                                    {% elif dataset == 'diabetes' %}
+                                        Cukrzyca
+                                    {% elif dataset == 'lung_cancer' %}
+                                        Rak Płuc
+                                    {% endif %}
+                                </h5>
+                                <p class="card-text">
+                                    {% if dataset == 'heart_disease' %}
+                                        Analiza ryzyka chorób serca na podstawie parametrów medycznych
+                                    {% elif dataset == 'diabetes' %}
+                                        Predykcja ryzyka cukrzycy na podstawie historii medycznej
+                                    {% elif dataset == 'lung_cancer' %}
+                                        Ocena ryzyka raka płuc na podstawie objawów i stylu życia
+                                    {% endif %}
+                                </p>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('dataset_form', dataset_name=dataset) }}"
+                                       class="btn btn-primary mb-2">Oblicz</a>
+                                    <a href="{{ url_for('history', dataset_name=dataset) }}"
+                                       class="btn btn-secondary">Historia predykcji</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
